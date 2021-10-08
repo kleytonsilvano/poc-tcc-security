@@ -12,7 +12,7 @@
 	<artifactId>poc-tcc-security</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>poc-tcc-security</name>
-	<description>POC para o TCC - Esse projeto terá as funcionalidades que são necessárias para os casos de uso referente ao mic-service</description>
+	<description>POC para o TCC - Esse projeto terá as funcionalidades de segurança para se gerar um token e autenticar fazendo o papel do security-service</description>
 	<properties>
 		<java.version>11</java.version>
 	</properties>
