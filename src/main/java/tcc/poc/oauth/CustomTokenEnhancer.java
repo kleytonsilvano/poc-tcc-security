@@ -1,4 +1,4 @@
-package tcc.poc;
+package tcc.poc.oauth;
 
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;

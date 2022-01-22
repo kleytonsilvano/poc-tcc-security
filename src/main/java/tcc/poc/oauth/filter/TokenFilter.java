@@ -1,4 +1,4 @@
-package tcc.poc;
+package tcc.poc.oauth.filter;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

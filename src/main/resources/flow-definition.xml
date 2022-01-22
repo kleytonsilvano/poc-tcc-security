@@ -44,7 +44,7 @@
         <oauth2:client-credentials />
     </oauth2:authorization-server>
 
-    <bean id="clientDetails" class="tcc.poc.DynamoClient"/>
+    <bean id="clientDetails" class="tcc.poc.oauth.DynamoClient"/>
 
 
     <bean id="oauthAccessDeniedHandler" class="org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler" />
@@ -59,14 +59,14 @@
         </constructor-arg>
     </bean>
 
-    <bean id="jwtAccessTokenConverter" class="tcc.poc.CustomJwtAccessTokenConverter" />
-    <bean id="tokenStore" class="tcc.poc.CustomJwtTokenStore">
+    <bean id="jwtAccessTokenConverter" class="tcc.poc.oauth.CustomJwtAccessTokenConverter" />
+    <bean id="tokenStore" class="tcc.poc.oauth.CustomJwtTokenStore">
         <constructor-arg>
             <ref bean="jwtAccessTokenConverter" />
         </constructor-arg>
     </bean>
 
-    <bean id="tokenServices" class="tcc.poc.TokenService">
+    <bean id="tokenServices" class="tcc.poc.oauth.TokenService">
         <property name="tokenStore" ref="tokenStore" />
         <property name="supportRefreshToken" value="true" />
         <property name="accessTokenValiditySeconds" value="3600" />
@@ -75,7 +75,7 @@
             <bean class="org.springframework.security.oauth2.provider.token.TokenEnhancerChain">
                 <property name="tokenEnhancers">
                     <list>
-                        <bean class="tcc.poc.CustomTokenEnhancer" />
+                        <bean class="tcc.poc.oauth.CustomTokenEnhancer" />
                     </list>
                 </property>
             </bean>
