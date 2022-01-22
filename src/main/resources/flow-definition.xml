@@ -42,7 +42,6 @@
     <oauth2:authorization-server client-details-service-ref="clientDetails" token-services-ref="tokenServices">
         <oauth2:refresh-token />
         <oauth2:client-credentials />
-        <!-- <oauth2:password authentication-manager-ref="authenticationManager1" /> -->
     </oauth2:authorization-server>
 
     <bean id="clientDetails" class="tcc.poc.DynamoClient"/>
@@ -59,17 +58,6 @@
             </list>
         </constructor-arg>
     </bean>
-
-    <!--
-    <security:authentication-manager id="authenticationManager1">
-        <security:authentication-provider>
-            <security:password-encoder hash="bcrypt" />
-            <security:user-service>
-                <security:user name="user1" password="$2a$10$OemLtg3LZaPxaYvkS6n1gezTenIKCLsVWQLDQl51QcSAqNQgpLdWW" authorities="" />
-            </security:user-service>
-        </security:authentication-provider>
-    </security:authentication-manager>
-    -->
 
     <bean id="jwtAccessTokenConverter" class="tcc.poc.CustomJwtAccessTokenConverter" />
     <bean id="tokenStore" class="tcc.poc.CustomJwtTokenStore">
