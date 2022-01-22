@@ -7,7 +7,7 @@
     http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.2.xsd
     http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-4.2.xsd
     http://www.springframework.org/schema/security/oauth2 http://www.springframework.org/schema/security/spring-security-oauth2.xsd
-    http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.2.xsd
+    http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-5.3.xsd
     http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.2.xsd">
 
     <security:http pattern="/oauth/token" create-session="never" authentication-manager-ref="clientAuthenticationManager" entry-point-ref="oauthAuthenticationEntryPoint">
@@ -28,7 +28,6 @@
 
     <security:authentication-manager id="clientAuthenticationManager">
         <security:authentication-provider user-service-ref="clientDetailsUserService">
-            <security:password-encoder hash="bcrypt" />
         </security:authentication-provider>
     </security:authentication-manager>
 
@@ -43,19 +42,11 @@
     <oauth2:authorization-server client-details-service-ref="clientDetails" token-services-ref="tokenServices">
         <oauth2:refresh-token />
         <oauth2:client-credentials />
-        <oauth2:password authentication-manager-ref="authenticationManager" />
+        <!-- <oauth2:password authentication-manager-ref="authenticationManager1" /> -->
     </oauth2:authorization-server>
 
-    <bean id="clientDetails" class="br.com.bancointer.DynamoClientDetailsDAO"/>
+    <bean id="clientDetails" class="tcc.poc.DynamoClient"/>
 
-    <!-- <oauth2:client-details-service id="clientDetails"> -->
-    <!-- <oauth2:client -->
-    <!-- client-id="client1" -->
-    <!-- secret="123" -->
-    <!-- scope="cdpro:gerar-boleto,cdpro:interpag" -->
-    <!-- authorized-grant-types="password,refresh_token,client_credentials" -->
-    <!-- authorities="ROLE_USER"/> -->
-    <!-- </oauth2:client-details-service> -->
 
     <bean id="oauthAccessDeniedHandler" class="org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler" />
     <bean id="oauthAuthenticationEntryPoint" class="org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint" />
@@ -69,25 +60,25 @@
         </constructor-arg>
     </bean>
 
-    <security:authentication-manager id="authenticationManager">
+    <!--
+    <security:authentication-manager id="authenticationManager1">
         <security:authentication-provider>
             <security:password-encoder hash="bcrypt" />
             <security:user-service>
-                <!--User credential. Currently used for the password auth flow-->
-                <!--TODO: Replace by user auth service-->
                 <security:user name="user1" password="$2a$10$OemLtg3LZaPxaYvkS6n1gezTenIKCLsVWQLDQl51QcSAqNQgpLdWW" authorities="" />
             </security:user-service>
         </security:authentication-provider>
     </security:authentication-manager>
+    -->
 
-    <bean id="jwtAccessTokenConverter" class="br.com.bancointer.CustomJwtAccessTokenConverter" />
-    <bean id="tokenStore" class="br.com.bancointer.CustomJwtTokenStore">
+    <bean id="jwtAccessTokenConverter" class="tcc.poc.CustomJwtAccessTokenConverter" />
+    <bean id="tokenStore" class="tcc.poc.CustomJwtTokenStore">
         <constructor-arg>
             <ref bean="jwtAccessTokenConverter" />
         </constructor-arg>
     </bean>
 
-    <bean id="tokenServices" class="br.com.bancointer.InterTokenServices">
+    <bean id="tokenServices" class="tcc.poc.TokenService">
         <property name="tokenStore" ref="tokenStore" />
         <property name="supportRefreshToken" value="true" />
         <property name="accessTokenValiditySeconds" value="3600" />
@@ -96,8 +87,7 @@
             <bean class="org.springframework.security.oauth2.provider.token.TokenEnhancerChain">
                 <property name="tokenEnhancers">
                     <list>
-                        <bean class="br.com.bancointer.InterCustomTokenEnhancer" />
-                        <ref bean="jwtAccessTokenConverter" />
+                        <bean class="tcc.poc.CustomTokenEnhancer" />
                     </list>
                 </property>
             </bean>
@@ -106,4 +96,4 @@
 
     <oauth2:expression-handler id="oauthExpressionHandler" />
     <oauth2:web-expression-handler id="oauthWebExpressionHandler" />
-</beans>swagg;
+</beans>

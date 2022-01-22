@@ -9,16 +9,38 @@ import com.amazonaws.services.dynamodbv2.document.spec.ScanSpec;
 import org.springframework.security.oauth2.provider.*;
 import org.springframework.security.oauth2.provider.client.BaseClientDetails;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class DynamoClient implements ClientDetailsService, ClientRegistrationService {
 
+    /*
     private final AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().build();
     private final DynamoDB dynamoDB = new DynamoDB(client);
     private String tableName = "client";
+    */
+    private final AmazonDynamoDB client = null;
+    private final DynamoDB dynamoDB = null;
+    private String tableName = "client";
 
+    public ClientDetails getclientDetails1() {
+        BaseClientDetails cl = new BaseClientDetails();
+        cl.setClientId("usuario");
+        cl.setClientSecret(getClientSecret("senha"));
+        cl.setAuthorizedGrantTypes(Arrays.asList("client_credentials"));
+        cl.setScope(Arrays.asList("scope"));
+        return cl;
+    }
+
+    @Override
+    public ClientDetails loadClientByClientId(String clientId) throws ClientRegistrationException {
+        return getclientDetails1();
+    }
+
+    /*
     @Override
     public ClientDetails loadClientByClientId(String clientId) throws ClientRegistrationException {
         Table table = dynamoDB.getTable(tableName);
@@ -26,6 +48,7 @@ public class DynamoClient implements ClientDetailsService, ClientRegistrationSer
         ClientDetails clientDetails = this.getClientDetailsFromItem(item);
         return clientDetails;
     }
+     */
 
     @Override
     public List<ClientDetails> listClientDetails() {
@@ -47,6 +70,9 @@ public class DynamoClient implements ClientDetailsService, ClientRegistrationSer
         return clientDetails;
     }
 
+    public String getClientSecret(String clientSecret) {
+        return "{noop}"+clientSecret;
+    }
 
 
 
