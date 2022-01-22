@@ -9,60 +9,44 @@ import org.springframework.security.oauth2.provider.*;
 import org.springframework.security.oauth2.provider.client.BaseClientDetails;
 import tcc.poc.model.User;
 
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class DynamoClient implements ClientDetailsService, ClientRegistrationService {
 
-    private final String GRANT_TYPE_PASSWORD = "password";
+    @Inject
+    private AmazonDynamoDB amazonDynamoDB;
 
-    /*
-    private final AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().build();
-    private final DynamoDB dynamoDB = new DynamoDB(client);
-    private String tableName = "client";
-    */
-    private final AmazonDynamoDB client = null;
-    private final DynamoDB dynamoDB = null;
-    private String tableNameClient = "client";
-    private String tableNameUser = "user";
+    private DynamoDB dynamoDB;
+    private String tableNameClient = "TABLE_CLIENT";
+    private String tableNameUser = "TABLE_USER";
 
-    public ClientDetails getclientDetails1() {
-        BaseClientDetails cl = new BaseClientDetails();
-        cl.setClientId("usuario");
-        cl.setClientSecret(getClientSecret("senha"));
-        cl.setAuthorizedGrantTypes(Arrays.asList("client_credentials"));
-        cl.setScope(Arrays.asList("scope"));
-        return cl;
+    @PostConstruct
+    public void createDynamoDB() {
+        this.dynamoDB = new DynamoDB(amazonDynamoDB);
     }
 
     @Override
     public ClientDetails loadClientByClientId(String clientId) throws ClientRegistrationException {
-        return getclientDetails1();
-    }
-
-    /*
-    @Override
-    public ClientDetails loadClientByClientId(String clientId) throws ClientRegistrationException {
-        Table table = dynamoDB.getTable(tableNameClient);
-        Item item = table.getItem("clienteId", clientId);
+        Table table = dynamoDB.getTable(tableNameUser);
+        Item item = table.getItem("clientId", clientId);
         ClientDetails clientDetails = this.getClientDetailsFromItem(item);
         return clientDetails;
     }
-    */
 
     public Boolean isValidUsername(String username, String password) throws ClientRegistrationException {
-        Table table = dynamoDB.getTable(tableNameUser);
+        Table table = dynamoDB.getTable(tableNameClient);
         Item item = table.getItem("username", username);
         User user = this.getUserFromItem(item);
         return user.getUsername()!=null && (user.getPassword()!=null && user.getPassword().equals(password));
     }
 
-
     @Override
     public List<ClientDetails> listClientDetails() {
-        Table table = dynamoDB.getTable(tableNameClient);
+        Table table = dynamoDB.getTable(tableNameUser);
         List<ClientDetails> allClientDetails = new ArrayList<>();
         table.scan(new ScanSpec()).forEach(item -> allClientDetails.add(getClientDetailsFromItem(item)));
         return allClientDetails;
@@ -71,7 +55,7 @@ public class DynamoClient implements ClientDetailsService, ClientRegistrationSer
     private ClientDetails getClientDetailsFromItem(Item item) {
         BaseClientDetails clientDetails = new BaseClientDetails();
         clientDetails.setClientId(item.getString("clientId"));
-        clientDetails.setClientSecret(item.getString("clientSecret"));
+        clientDetails.setClientSecret(getClientSecret(item.getString("clientSecret")));
 
         List<String> scopes = item.getList("scopes");
         clientDetails.setScope(scopes.stream().distinct().collect(Collectors.toList()));
