@@ -139,22 +139,44 @@ public class TokenFilter implements Filter {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     private static class NewToken {
-        private String token;
-        private String expires_in;
         @JsonProperty
-        public String getToken() {
-            return token;
+        private String access_token;
+        @JsonProperty
+        private String scope;
+        @JsonProperty
+        private String token_type;
+        @JsonProperty
+        private int expires_in;
+
+        public String getAccess_token() {
+            return access_token;
         }
-        @JsonProperty
-        public void setToken(String token) {
-            this.token = token;
+
+        public void setAccess_token(String access_token) {
+            this.access_token = access_token;
         }
-        @JsonProperty
-        public String getExpiresIn() {
+
+        public String getScope() {
+            return scope;
+        }
+
+        public void setScope(String scope) {
+            this.scope = scope;
+        }
+
+        public String getToken_type() {
+            return token_type;
+        }
+
+        public void setToken_type(String token_type) {
+            this.token_type = token_type;
+        }
+
+        public int getExpires_in() {
             return expires_in;
         }
-        @JsonProperty
-        public void setExpiresIn(String expires_in) {
+
+        public void setExpires_in(int expires_in) {
             this.expires_in = expires_in;
         }
     }
