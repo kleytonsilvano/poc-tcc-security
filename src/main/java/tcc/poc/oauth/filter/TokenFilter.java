@@ -1,9 +1,9 @@
 package tcc.poc.oauth.filter;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
+import tcc.poc.model.BearerToken;
+import tcc.poc.model.TokenRetorno;
 
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
@@ -11,6 +11,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 import java.io.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 @WebFilter
 @Component
@@ -22,18 +25,21 @@ public class TokenFilter implements Filter {
     }
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException {
         try {
             HtmlResponseWrapper newResponse = new HtmlResponseWrapper((HttpServletResponse) response);
             chain.doFilter(request, newResponse);
             String servletResponseStr = newResponse.getCaptureAsString();
+            String[] client_ids = request.getParameterMap().getOrDefault("client_id", new String[]{""});
+            String clientId = client_ids[0];
 
             if(((HttpServletRequest)request).getServletPath().contains("oauth")) {
 
                 ObjectMapper om = new ObjectMapper();
-                NewToken nt = om.readValue(servletResponseStr, NewToken.class);
+                BearerToken bearerToken = om.readValue(servletResponseStr, BearerToken.class);
+                TokenRetorno tokenRetorno = new TokenRetorno(bearerToken.getExpires_in(), getScope(bearerToken.getScope()), clientId);
 
-                response.getOutputStream().write(om.writeValueAsBytes(nt));
+                response.getOutputStream().write(om.writeValueAsBytes(tokenRetorno));
 
             } else {
               response.getOutputStream().write(servletResponseStr.getBytes());
@@ -137,47 +143,11 @@ public class TokenFilter implements Filter {
         }
     }
 
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    private static class NewToken {
-        @JsonProperty
-        private String access_token;
-        @JsonProperty
-        private String scope;
-        @JsonProperty
-        private String token_type;
-        @JsonProperty
-        private int expires_in;
-
-        public String getAccess_token() {
-            return access_token;
+    private static Set<String> getScope(String scope) {
+        if(scope != null) {
+            return new HashSet<>(Arrays.asList(scope.split(",")));
         }
-
-        public void setAccess_token(String access_token) {
-            this.access_token = access_token;
-        }
-
-        public String getScope() {
-            return scope;
-        }
-
-        public void setScope(String scope) {
-            this.scope = scope;
-        }
-
-        public String getToken_type() {
-            return token_type;
-        }
-
-        public void setToken_type(String token_type) {
-            this.token_type = token_type;
-        }
-
-        public int getExpires_in() {
-            return expires_in;
-        }
-
-        public void setExpires_in(int expires_in) {
-            this.expires_in = expires_in;
-        }
+        return null;
     }
+
 }
