@@ -37,7 +37,10 @@ public class TokenRetorno {
     }
 
 
-    @JsonIgnoreProperties(ignoreUnknown = true)
+    @org.codehaus.jackson.map.annotate.JsonSerialize(include = org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion.NON_DEFAULT)
+    @org.codehaus.jackson.annotate.JsonIgnoreProperties(ignoreUnknown = true)
+    @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_DEFAULT)
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)
     public class AccessToken implements Serializable {
 
         @JsonProperty
@@ -46,11 +49,23 @@ public class TokenRetorno {
         private String client_id;
         @JsonProperty
         private Long expiration;
+        @JsonProperty
+        private String username;
+        @JsonProperty
+        private String typeUser;
 
         public AccessToken(Integer expiresIn, Set<String> scope, String client_id) {
             this.scope = scope;
             this.client_id = client_id;
             setExpiration(new Date(System.currentTimeMillis() + (expiresIn * 1000L)).getTime());
+        }
+
+        public AccessToken(Integer expiresIn, Set<String> scope, String client_id, String username, String typeUser) {
+            this.scope = scope;
+            this.client_id = client_id;
+            setExpiration(new Date(System.currentTimeMillis() + (expiresIn * 1000L)).getTime());
+            this.username = username;
+            this.typeUser = typeUser;
         }
 
         public Set<String> getScope() {
@@ -75,6 +90,22 @@ public class TokenRetorno {
 
         public void setExpiration(Long expiration) {
             this.expiration = expiration;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
+
+        public String getTypeUser() {
+            return typeUser;
+        }
+
+        public void setTypeUser(String typeUser) {
+            this.typeUser = typeUser;
         }
     }
 }

@@ -1,0 +1,61 @@
+openapi: 3.0.0
+info:
+  title: Security-Service
+  description: Security module to implement oauth token generation and control
+  version: "1.0.0"
+servers:
+  - url: /api/mic-service/v1
+
+paths:
+  /oauth/token:
+    post:
+      summary: Return oauth token
+      operationId: getToken
+      requestBody:
+        description: Optional description in *Markdown*
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OAuthTokenForm'
+      responses:
+        '200':
+          description: Return customer list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OAuthTokenReturn'
+        '400':
+          description: Request error
+        '404':
+          description: Data not found
+        '500':
+          description: internal error
+
+components:
+  schemas:
+    OAuthTokenForm:
+      title: OAuthTokenForm
+      type: object
+      required:
+        - client_id
+        - client_secret
+        - grant_type
+      properties:
+        client_id:
+          type: string
+        client_secret:
+          type: string
+        grant_type:
+          type: string
+    OAuthTokenReturn:
+      title: OAuthTokenReturn
+      type: object
+      required:
+        - access_token
+        - expires_in
+      properties:
+        access_token:
+          type: string
+        expires_in:
+          type: integer
