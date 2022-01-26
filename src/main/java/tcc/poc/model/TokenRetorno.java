@@ -20,6 +20,11 @@ public class TokenRetorno {
         this.access_token = JWTUtils.createJWT(new AccessToken(expiration, scope, clientId));
     }
 
+    public TokenRetorno(Integer expiration, Set<String> scope, String clientId, String username, String typeUser) {
+        this.expires_in = expiration;
+        this.access_token = JWTUtils.createJWT(new AccessToken(expiration, scope, clientId, username, typeUser));
+    }
+
     public String getAccess_token() {
         return access_token;
     }

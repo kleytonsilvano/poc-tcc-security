@@ -16,6 +16,10 @@ public class User implements Serializable {
     @com.fasterxml.jackson.annotation.JsonProperty("password")
     private String password;
 
+    @org.codehaus.jackson.annotate.JsonProperty("type_client")
+    @com.fasterxml.jackson.annotation.JsonProperty("type_client")
+    private String typeClient;
+
     public String getUsername() {
         return username;
     }
@@ -30,5 +34,13 @@ public class User implements Serializable {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getTypeClient() {
+        return typeClient;
+    }
+
+    public void setTypeClient(String typeClient) {
+        this.typeClient = typeClient;
     }
 }
