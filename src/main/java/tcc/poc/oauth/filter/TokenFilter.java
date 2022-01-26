@@ -1,10 +1,15 @@
 package tcc.poc.oauth.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.stereotype.Component;
+import tcc.poc.constants.AppConstants;
 import tcc.poc.model.BearerToken;
 import tcc.poc.model.TokenRetorno;
+import tcc.poc.model.User;
+import tcc.poc.oauth.DynamoClient;
 
+import javax.inject.Inject;
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
@@ -19,6 +24,9 @@ import java.util.Set;
 @Component
 public class TokenFilter implements Filter {
 
+    @Inject
+    private DynamoClient service;
+
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
 
@@ -30,20 +38,40 @@ public class TokenFilter implements Filter {
             HtmlResponseWrapper newResponse = new HtmlResponseWrapper((HttpServletResponse) response);
             chain.doFilter(request, newResponse);
             String servletResponseStr = newResponse.getCaptureAsString();
-            String[] client_ids = request.getParameterMap().getOrDefault("client_id", new String[]{""});
-            String clientId = client_ids[0];
+            String clientId = getParameter(request, "client_id");
+            String grantType = getParameter(request, "grant_type");
 
             if(((HttpServletRequest)request).getServletPath().contains("oauth")) {
 
                 ObjectMapper om = new ObjectMapper();
                 BearerToken bearerToken = om.readValue(servletResponseStr, BearerToken.class);
-                TokenRetorno tokenRetorno = new TokenRetorno(bearerToken.getExpires_in(), getScope(bearerToken.getScope()), clientId);
 
-                response.getOutputStream().write(om.writeValueAsBytes(tokenRetorno));
+                if(AppConstants.GRANT_TYPE_PASSWORD.equalsIgnoreCase(grantType)) {
+
+                    String username = getParameter(request, "username");
+                    String password = getParameter(request, "password");
+                    User user = this.service.loadUserByUsernameAndPassword(username, password);
+
+                    if(user == null) {
+                        throw new SecurityException("Invalid username/password");
+                    }
+
+                    TokenRetorno tokenRetorno = new TokenRetorno(bearerToken.getExpires_in(),
+                            getScope(bearerToken.getScope()), clientId, username, user.getTypeClient());
+                    response.getOutputStream().write(om.writeValueAsBytes(tokenRetorno));
+
+                } else {
+
+                    TokenRetorno tokenRetorno = new TokenRetorno(bearerToken.getExpires_in(), getScope(bearerToken.getScope()), clientId);
+                    response.getOutputStream().write(om.writeValueAsBytes(tokenRetorno));
+
+                }
 
             } else {
-              response.getOutputStream().write(servletResponseStr.getBytes());
+                response.getOutputStream().write(servletResponseStr.getBytes());
             }
+        }catch (SecurityException e) {
+            throw e;
         }catch (Exception e) {
             ((HttpServletResponse) response).sendError(500, e.getMessage());
         }
@@ -149,5 +177,11 @@ public class TokenFilter implements Filter {
         }
         return null;
     }
+
+    private String getParameter(ServletRequest request, String nameParameter) {
+        String[] p = request.getParameterMap().getOrDefault(nameParameter, new String[]{""});
+        return p[0];
+    }
+
 
 }

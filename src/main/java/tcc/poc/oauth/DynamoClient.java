@@ -37,11 +37,14 @@ public class DynamoClient implements ClientDetailsService, ClientRegistrationSer
         return clientDetails;
     }
 
-    public Boolean isValidUsername(String username, String password) throws ClientRegistrationException {
+    public User loadUserByUsernameAndPassword(String username, String password) throws ClientRegistrationException {
         Table table = dynamoDB.getTable(tableNameClient);
-        Item item = table.getItem("username", username);
-        User user = this.getUserFromItem(item);
-        return user.getUsername()!=null && (user.getPassword()!=null && user.getPassword().equals(password));
+        Item item = table.getItem("cpf_cnpj_client", username);
+        if(item != null) {
+            User user = this.getUserFromItem(item);
+            return (user.getUsername()!=null && (user.getPassword()!=null && user.getPassword().equals(password))) ? user : null;
+        }
+        return null;
     }
 
     @Override
@@ -66,8 +69,9 @@ public class DynamoClient implements ClientDetailsService, ClientRegistrationSer
 
     private User getUserFromItem(Item item) {
         User user = new User();
-        user.setUsername(item.getString("username"));
+        user.setUsername(item.getString("cpf_cnpj_client"));
         user.setPassword(item.getString("password"));
+        user.setTypeClient(item.getString("type_client"));
         return user;
     }
 
