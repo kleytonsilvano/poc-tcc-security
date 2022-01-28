@@ -174,7 +174,7 @@ public class TokenFilter implements Filter {
 
     private static Set<String> getScope(String scope) {
         if(scope != null) {
-            return new HashSet<>(Arrays.asList(scope.split(",")));
+            return new HashSet<>(Arrays.asList(scope.split(" ")));
         }
         return null;
     }
