@@ -45,6 +45,7 @@ public class TokenFilter implements Filter {
 
                 ObjectMapper om = new ObjectMapper();
                 BearerToken bearerToken = om.readValue(servletResponseStr, BearerToken.class);
+                bearerToken.setExpires_in(3600);
 
                 if(AppConstants.GRANT_TYPE_PASSWORD.equalsIgnoreCase(grantType)) {
 
