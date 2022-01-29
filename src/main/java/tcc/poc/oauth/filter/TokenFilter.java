@@ -35,6 +35,7 @@ public class TokenFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException {
         try {
+            User user = getUserByUsernamePassword(request);
             HtmlResponseWrapper newResponse = new HtmlResponseWrapper((HttpServletResponse) response);
             chain.doFilter(request, newResponse);
             String servletResponseStr = newResponse.getCaptureAsString();
@@ -50,13 +51,8 @@ public class TokenFilter implements Filter {
                 if(AppConstants.GRANT_TYPE_PASSWORD.equalsIgnoreCase(grantType)) {
 
                     String username = getParameter(request, "username");
-                    String password = getParameter(request, "password");
-                    User user = this.service.loadUserByUsernameAndPassword(username, password);
 
-                    if(user == null) {
-                        throw new SecurityException("Invalid username/password");
-                    }
-
+                    newResponse.setStatus(200);
                     TokenRetorno tokenRetorno = new TokenRetorno(bearerToken.getExpires_in(),
                             getScope(bearerToken.getScope()), clientId, username, user.getTypeClient());
                     response.getOutputStream().write(om.writeValueAsBytes(tokenRetorno));
@@ -72,10 +68,30 @@ public class TokenFilter implements Filter {
                 response.getOutputStream().write(servletResponseStr.getBytes());
             }
         }catch (SecurityException e) {
-            throw e;
+            ((HttpServletResponse) response).sendError(401, e.getMessage());
         }catch (Exception e) {
             ((HttpServletResponse) response).sendError(500, e.getMessage());
         }
+    }
+
+    private User getUserByUsernamePassword(ServletRequest request) {
+
+        String grantType = getParameter(request, "grant_type");
+        if(AppConstants.GRANT_TYPE_PASSWORD.equalsIgnoreCase(grantType)) {
+
+            String username = getParameter(request, "username");
+            String password = getParameter(request, "password");
+            User user = this.service.loadUserByUsernameAndPassword(username, password);
+
+            if(user == null) {
+                throw new SecurityException("Invalid username/password");
+            }
+
+            return user;
+
+        }
+
+        return null;
     }
 
     @Override
@@ -88,10 +104,22 @@ public class TokenFilter implements Filter {
         private final ByteArrayOutputStream capture;
         private ServletOutputStream output;
         private PrintWriter writer;
+        private int status;
 
         public HtmlResponseWrapper(HttpServletResponse response) {
             super(response);
             capture = new ByteArrayOutputStream(response.getBufferSize());
+        }
+
+        @Override
+        public void setStatus(int sc) {
+            super.setStatus(200);
+            this.status = sc;
+        }
+
+        @Override
+        public int getStatus() {
+            return status;
         }
 
         @Override
