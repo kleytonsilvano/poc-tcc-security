@@ -19,13 +19,6 @@
         <security:csrf disabled="true" />
     </security:http>
 
-    <security:http pattern="/register/**">
-        <security:intercept-url pattern="/register/client" access="IS_AUTHENTICATED_ANONYMOUSLY" />
-        <security:form-login authentication-failure-url="/login?authentication_error=true" default-target-url="/index" login-page="/login" login-processing-url="/login.do" />
-        <security:logout logout-success-url="/index" logout-url="/logout.do" />
-        <security:anonymous />
-    </security:http>
-
     <security:authentication-manager id="clientAuthenticationManager">
         <security:authentication-provider user-service-ref="clientDetailsUserService">
         </security:authentication-provider>
